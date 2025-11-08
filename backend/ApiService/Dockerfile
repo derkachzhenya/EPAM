@@ -47,7 +47,7 @@ RUN dotnet publish ./Source/**/Api.csproj --no-restore -c Release -v quiet -o ap
 
 # Runtime Image
 FROM ${BASE_IMAGE_REPO}/${BASE_IMAGE_RUNTIME}:${BASE_IMAGE_RUNTIME_TAG} AS run
-WORKDIR /
+WORKDIR /app
 EXPOSE 8080
-COPY --from=publish /sln/app .
+COPY --from=publish /sln/app/ .
 ENTRYPOINT ["dotnet", "Epam.ItMarathon.ApiService.Api.dll"]
