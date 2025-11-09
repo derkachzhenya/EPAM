@@ -36,8 +36,8 @@ on:
 env:
   MICROSERVICE: ${{ inputs.microservice }}
   IMAGE_TAG: ${{ inputs.image_tag || 'latest' }}
-  DOCKER_HUB_USERNAME: ${{ coalesce(secrets.DOCKER_HUB_USERNAME, secrets.DOCKERHUB_USERNAME) }}
-  DOCKER_HUB_TOKEN: ${{ coalesce(secrets.DOCKER_HUB_TOKEN, secrets.DOCKERHUB_TOKEN) }}
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME || secrets.DOCKERHUB_USERNAME || secrets.DOCKER_USERNAME }}
+  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN || secrets.DOCKERHUB_TOKEN || secrets.DOCKER_PASSWORD }}
 
 jobs:
   deploy:
