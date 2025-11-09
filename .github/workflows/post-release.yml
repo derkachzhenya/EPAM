@@ -32,8 +32,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ coalesce(secrets.DOCKER_HUB_USERNAME, secrets.DOCKERHUB_USERNAME) }}
-          password: ${{ coalesce(secrets.DOCKER_HUB_TOKEN, secrets.DOCKERHUB_TOKEN) }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Verify Docker images exist
         run: |
@@ -41,7 +41,7 @@ jobs:
           
           SERVICES=("react" "angular" "dotnet")
           for service in "${SERVICES[@]}"; do
-            IMAGE="${{ coalesce(secrets.DOCKER_HUB_USERNAME, secrets.DOCKERHUB_USERNAME) }}/${service}:${{ needs.get-latest-tag.outputs.tag_version }}"
+            IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/${service}:${{ needs.get-latest-tag.outputs.tag_version }}"
             echo "Checking if $IMAGE exists..."
             
             if docker manifest inspect "$IMAGE" > /dev/null 2>&1; then
@@ -79,7 +79,7 @@ jobs:
         id: vars
         run: |
           echo "VERSION=${{ needs.get-latest-tag.outputs.tag_version }}" >> $GITHUB_ENV
-          echo "DOCKER_HUB_USERNAME=${{ coalesce(secrets.DOCKER_HUB_USERNAME, secrets.DOCKERHUB_USERNAME) }}" >> $GITHUB_ENV
+          echo "DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" >> $GITHUB_ENV
     
       - name: Generate Changelog
         id: changelog
