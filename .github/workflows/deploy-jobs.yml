@@ -36,7 +36,8 @@ on:
 env:
   MICROSERVICE: ${{ inputs.microservice }}
   IMAGE_TAG: ${{ inputs.image_tag || 'latest' }}
-  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_USERNAME: ${{ coalesce(secrets.DOCKER_HUB_USERNAME, secrets.DOCKERHUB_USERNAME) }}
+  DOCKER_HUB_TOKEN: ${{ coalesce(secrets.DOCKER_HUB_TOKEN, secrets.DOCKERHUB_TOKEN) }}
 
 jobs:
   deploy:
@@ -51,7 +52,7 @@ jobs:
         uses: ./.github/actions/set-var
         with:  
           microservice: ${{ env.MICROSERVICE }}
-          docker_hub_username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          docker_hub_username: ${{ env.DOCKER_HUB_USERNAME }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'eu-central-1' }} 
@@ -82,8 +83,8 @@ jobs:
           INSTANCE_ID: ${{ env.INSTANCE_ID }} 
           CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
           PORT: ${{ env.PORT }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_TOKEN }}
+          DOCKER_USERNAME: ${{ env.DOCKER_HUB_USERNAME }}
+          DOCKER_PASSWORD: ${{ env.DOCKER_HUB_TOKEN }}
 
       - name: Verify deployment
         run: .github/scripts/verify-deployment.sh
