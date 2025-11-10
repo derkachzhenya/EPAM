@@ -1,9 +1,14 @@
 using Epam.ItMarathon.ApiService.Api.Extension;
 using Serilog;
 
-var builder = WebApplication
-    .CreateBuilder(args)
-    .ConfigureApplicationBuilder();
+var builder = WebApplication.CreateBuilder(args);
+
+// ✅ ДОБАВЛЯЕМ ЧТЕНИЕ ENV
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
+builder = builder.ConfigureApplicationBuilder();
 
 var app = builder
     .Build()

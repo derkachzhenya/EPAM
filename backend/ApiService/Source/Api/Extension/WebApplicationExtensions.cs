@@ -27,8 +27,10 @@ namespace Epam.ItMarathon.ApiService.Api.Extension
 
             #region Security
 
-            _ = application.UseHsts();
-            _ = application.UseHttpsRedirection();
+            // ❌ IMPORTANT: Disable HSTS and HTTPS redirect for AWS Docker container
+            // _ = application.UseHsts();
+            // _ = application.UseHttpsRedirection();
+
             _ = application.UseCors();
 
             #endregion Security
