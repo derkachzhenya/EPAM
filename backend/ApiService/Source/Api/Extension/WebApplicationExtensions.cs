@@ -6,60 +6,48 @@ using Serilog;
 
 namespace Epam.ItMarathon.ApiService.Api.Extension
 {
-    /// <summary>
-    /// WebApplication builder static setup-class.
-    /// </summary>
     [ExcludeFromCodeCoverage]
     public static class WebApplicationExtensions
     {
-        /// <summary>
-        /// Extension method for more fluent setup. This is where all required configuration happens.
-        /// </summary>
-        /// <param name="application">The WebApplication instance.</param>
-        /// <returns>Reference to input <paramref name="application"/>.</returns>
         public static WebApplication ConfigureApplication(this WebApplication application)
         {
             #region Logging
 
-            _ = application.UseSerilogRequestLogging();
+            application.UseSerilogRequestLogging();
 
-            #endregion Logging
+            #endregion
 
-            #region Security
+            #region 
 
-            // ❌ IMPORTANT: Disable HSTS and HTTPS redirect for AWS Docker container
-            // _ = application.UseHsts();
-            // _ = application.UseHttpsRedirection();
+            application.UseCors("FrontendCors");
 
-            _ = application.UseCors();
-
-            #endregion Security
+            #endregion
 
             #region Swagger
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
 
-            _ = application.UseSwagger();
-            _ = application.UseSwaggerUI(c =>
+            application.UseSwagger();
+            application.UseSwaggerUI(c =>
                 c.SwaggerEndpoint(
                     "/swagger/v1/swagger.json",
                     $"Secret Nick API - {textInfo.ToTitleCase(application.Environment.EnvironmentName)} - V1"));
 
-            #endregion Swagger
+            #endregion
 
-            #region MinimalApi
+            #region Minimal API
 
-            _ = application.MapSystemEndpoints();
-            _ = application.MapRoomEndpoints();
-            _ = application.MapUserEndpoints();
+            application.MapSystemEndpoints();
+            application.MapRoomEndpoints();
+            application.MapUserEndpoints();
 
-            #endregion MinimalApi
+            #endregion
 
-            #region Database
+            #region Database Migrations
 
             application.Services.MigrateDatabase();
 
-            #endregion Database
+            #endregion
 
             return application;
         }

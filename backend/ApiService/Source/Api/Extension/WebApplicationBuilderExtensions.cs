@@ -14,25 +14,19 @@ using Serilog;
 
 namespace Epam.ItMarathon.ApiService.Api.Extension
 {
-    /// <summary>
-    /// WebApplicationBuilder static setup-class.
-    /// </summary>
     [ExcludeFromCodeCoverage]
     public static class WebApplicationBuilderExtensions
     {
-        /// <summary>
-        /// Extension method for more fluent setup. This is where all required configuration happens.
-        /// </summary>
-        /// <param name="builder">The WebApplicationBuilder instance.</param>
         public static WebApplicationBuilder ConfigureApplicationBuilder(this WebApplicationBuilder builder)
         {
             #region Logging
 
-            _ = builder.Host.UseSerilog((hostContext, loggerConfiguration) =>
+            builder.Host.UseSerilog((hostContext, loggerConfiguration) =>
             {
                 var assembly = Assembly.GetEntryAssembly();
 
-                _ = loggerConfiguration.ReadFrom.Configuration(hostContext.Configuration)
+                loggerConfiguration
+                    .ReadFrom.Configuration(hostContext.Configuration)
                     .Enrich.WithProperty(
                         "Assembly Version",
                         assembly?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version)
@@ -41,25 +35,26 @@ namespace Epam.ItMarathon.ApiService.Api.Extension
                         assembly?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
             });
 
-            #endregion Logging
+            #endregion
 
-            #region Security
+            #region CORS 
 
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(policyBuilder =>
+                options.AddPolicy("FrontendCors", policyBuilder =>
                 {
-                    policyBuilder.AllowAnyOrigin()
+                    policyBuilder
+                        .AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
             });
 
-            #endregion Security
+            #endregion
 
             #region Serialization
 
-            _ = builder.Services.Configure<JsonOptions>(opt =>
+            builder.Services.Configure<JsonOptions>(opt =>
             {
                 opt.SerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 opt.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -68,14 +63,14 @@ namespace Epam.ItMarathon.ApiService.Api.Extension
                 opt.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
             });
 
-            #endregion Serialization
+            #endregion
 
             #region Swagger
 
             var textInfo = CultureInfo.CurrentCulture.TextInfo;
 
-            _ = builder.Services.AddEndpointsApiExplorer();
-            _ = builder.Services.AddSwaggerGen(options =>
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1",
                     new OpenApiInfo
@@ -89,27 +84,27 @@ namespace Epam.ItMarathon.ApiService.Api.Extension
                             Url = new Uri("https://opensource.org/licenses/MIT")
                         }
                     });
-                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
                 options.DocInclusionPredicate((name, api) => true);
                 options.DocumentFilter<SwaggerTagDocumentFilter>();
             });
 
-            #endregion Swagger
+            #endregion
 
             #region Validation
 
-            _ = builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
+            builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
 
-            #endregion Validation
+            #endregion
 
-            #region Project Dependencies
+            #region Dependencies
 
             builder.Services.InjectInfrastructureLayer(builder.Configuration);
             builder.Services.InjectApplicationLayer();
 
-            #endregion Project Dependencies
+            #endregion
 
             #region AutoMapper
 
