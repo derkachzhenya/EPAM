@@ -19,7 +19,7 @@ namespace Epam.ItMarathon.ApiService.Api.Extension
 
             #region 
 
-            application.UseCors("FrontendCors");
+            application.UseCors(WebApplicationBuilderExtensions.FrontendCorsPolicy);
 
             #endregion
 

@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
@@ -9,6 +10,7 @@ using Epam.ItMarathon.ApiService.Application;
 using Epam.ItMarathon.ApiService.Infrastructure;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -17,6 +19,8 @@ namespace Epam.ItMarathon.ApiService.Api.Extension
     [ExcludeFromCodeCoverage]
     public static class WebApplicationBuilderExtensions
     {
+        public const string FrontendCorsPolicy = "FrontendCors";
+
         public static WebApplicationBuilder ConfigureApplicationBuilder(this WebApplicationBuilder builder)
         {
             #region Logging
@@ -39,14 +43,28 @@ namespace Epam.ItMarathon.ApiService.Api.Extension
 
             #region CORS 
 
+            var frontendHosts = builder.Configuration
+                .GetSection("Options:FrontendHosts")
+                .Get<string[]>() ?? Array.Empty<string>();
+
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("FrontendCors", policyBuilder =>
+                options.AddPolicy(FrontendCorsPolicy, policyBuilder =>
                 {
+                    if (frontendHosts.Length == 0)
+                    {
+                        policyBuilder
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                        return;
+                    }
+
                     policyBuilder
-                        .AllowAnyOrigin()
+                        .WithOrigins(frontendHosts)
                         .AllowAnyHeader()
-                        .AllowAnyMethod();
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
 
